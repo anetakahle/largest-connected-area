@@ -1,37 +1,23 @@
-/* 
-koncept:
--udrzujeme si ctverce a zároveň vnější hranici
--budu si vytvářet graf (vrcholy budou bílá políčka)
--najdu komponenty souvislosti bílých políček (pomocí union-find)
-
-pseudokod:
-
-
-pozorovani:
--pocet otviracich zavorek na zacatku vstupu je roven hloubce 
--muzeme si pocitat, v jake jsme hloubce - pro každou hloubku si muzeme pocitat, kolik prvku jsme jiz pridali
-(-pokud zrovna pridavam 3. prvek vrstvy, tak začínám pod 1. prvkem vlevo
--pokud pridavam 2. prvek, pridam ho nahoru)
-
--rekurzivne si delim problem na podproblemy o velikosti jednotlvych ctverecku
-
-- pro každý keřík si pamatuji jeho počet prvků (a můžu si pamatovat i hloubku)
-- union find - vždy při spojování 2 keříků připojím menší keřík pod kořen toho většího
-*/
-
 
 #include <list>
 #include <iostream>
 using namespace std;
 
-
 long global_max = 0;
+
 
 struct vrchol
 {
     long velikost;
     list<vrchol *> hrany; //list pointeru na vrcholy
+    bool navstiven = false;
+
+    vrchol(long size){//obsah
+        velikost = size;
+    }
 };
+
+list<vrchol> seznam_vrcholu;
 
 
 struct interval
@@ -119,7 +105,9 @@ hranice solve(int size){//"DFS"
         return hranice(size, NULL);
     }
     else if (znak == '1'){
-        return hranice(size, new vrchol()); //new znamena, ze jsem vrchol dala do globalni dynamicke pameti a musim ho pak i smazat
+        vrchol v = vrchol(size*(long)size);
+        seznam_vrcholu.push_back(v);
+        return hranice(size, &seznam_vrcholu.back()); //new znamena, ze jsem vrchol dala do globalni dynamicke pameti a musim ho pak i smazat
     }
     else if(znak == '('){ //musime pak smazat zaviraci zavorku
         hranice levy_horni_kvadrant = solve(size/2);
@@ -153,22 +141,44 @@ hranice solve(int size){//"DFS"
 }
 
 
-    
-
-
 // def spoj_kvadranty()
     //vstup... 4 x 4 listy(spojaky)
     //vraci seznamy 
 
-// def najdi_komponenty()
+long local_max = 0;
+
+
+void dfs(vrchol &v){
+    local_max += v.velikost;
+    v.navstiven = true;
+    for(vrchol *hrana : v.hrany){
+        if (!(*hrana).navstiven){
+            dfs(*hrana);
+        }
+    }
+}
+
+void najdi_komponenty(){
+    for(vrchol &v : seznam_vrcholu){
+        if (!v.navstiven){
+            local_max = 0;
+            dfs(v);
+            if (local_max > global_max){
+                global_max = local_max;
+            }
+        }
+    }
+}
 
 
 
 int main(){
 
     //zavolej solve
-    //solve()
-    //vypis global_max
     //prohledat vytvoreny graf
+    //vypis global_max
+    solve(1<<4);
+    najdi_komponenty();
+    cout << global_max;
+    
 }
-
