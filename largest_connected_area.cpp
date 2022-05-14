@@ -1,9 +1,9 @@
-
 #include <list>
 #include <iostream>
 using namespace std;
 
 long global_max = 0;
+
 
 
 struct vrchol
@@ -95,7 +95,7 @@ void spojovani(list<interval>& a, list<interval>& b){
         a.back().delka += b.front().delka;
         b.pop_front();
     }
-    a.splice(a.begin(), b);
+    a.splice(a.end(), b);
 }
 
 
@@ -171,14 +171,14 @@ void najdi_komponenty(){
 }
 
 
-
 int main(){
 
     //zavolej solve
     //prohledat vytvoreny graf
     //vypis global_max
-    solve(1<<4);
+    solve(1<<30);
     najdi_komponenty();
     cout << global_max;
     
 }
+
